@@ -1,7 +1,21 @@
 <template>
   <div>
-    <div>Hi {{ name }}</div>
-    <router-view></router-view>
+    <header class="bg-purple-900 p-4">
+      <div class="flex justify-between max-w-5xl mx-auto">
+        <div class="logo text-white font-bold">FLASHLEARN</div>
+        <div class="text-white">
+          {{ name }}
+        </div>
+      </div>
+    </header>
+
+    <section class="max-w-5xl mx-auto bg-white mt-6 mb-12 p-12 min-h-screen shadow-sm pb-64">
+      <router-view></router-view>
+    </section>
+
+    <footer class="bg-gray-200 p-2 text-sm flex justify-center border-t">
+      Made with ❤️
+    </footer>
   </div>
 </template>
 
