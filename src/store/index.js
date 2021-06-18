@@ -59,6 +59,10 @@ export default new Vuex.Store({
   },
 
   mutations: {
+    RESET_STATE: (state) => {
+      Object.assign(state, getDefaultState());
+    },
+
     SET_AUTH_TOKEN: (state, token) => {
       Vue.set(state.auth, "token", token);
     },
@@ -99,22 +103,29 @@ export default new Vuex.Store({
 
   actions: {
     async authLogin({ commit }, payload) {
+      let creationToast = this._vm.$buefy.toast.open({
+        indefinite: true,
+        message: `Logging in ...`,
+        type: "is-success",
+      });
       const response = await loginAPI(payload);
       if (response.status === 200) {
         const { access_token, user } = response["data"];
-
         commit("SET_AUTH_TOKEN", access_token);
         commit("SET_AUTH_USER", user);
         localStorage.setItem("token", access_token);
         localStorage.setItem("user", JSON.stringify(user));
+        if (creationToast) {
+          creationToast.close();
+          creationToast = null;
+        }
         return { success: true };
       }
       return { success: false };
     },
 
     authLogout({ commit }) {
-      commit("SET_AUTH_TOKEN", null);
-      commit("SET_AUTH_USER", null);
+      commit("RESET_STATE");
       localStorage.removeItem("token");
       localStorage.removeItem("user");
     },

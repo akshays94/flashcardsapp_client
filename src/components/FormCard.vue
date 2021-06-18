@@ -22,6 +22,7 @@
 
       <BaseButton
         title="Close"
+        button-color="red"
         class="ml-4"
         @on-clicked="closeCardFormForAdd()"
       />

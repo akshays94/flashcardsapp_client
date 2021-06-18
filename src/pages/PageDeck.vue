@@ -38,15 +38,15 @@
 
     <div class="bg-purple-700 border-b-4 border-black p-2 flex rounded-lg ">
       <div
-        class="font-bold text-lg text-white py-1 px-4 rounded-full cursor-pointer"
-        :class="{ 'bg-purple-500': tabCardsActive }"
+        class="font-bold text-lg text-white py-1 px-4 rounded-full cursor-pointer transition-all duration-300"
+        :class="{ 'bg-purple-500 underline': tabCardsActive }"
         @click="tabChange('cards')"
       >
         Cards
       </div>
       <div
-        class="font-bold text-lg text-white py-1 px-4 rounded-full cursor-pointer ml-4"
-        :class="{ 'bg-purple-500': tabRevisionsActive }"
+        class="font-bold text-lg text-white py-1 px-4 rounded-full cursor-pointer ml-4 transition-all duration-300"
+        :class="{ 'bg-purple-500 underline': tabRevisionsActive }"
         @click="tabChange('revisions')"
       >
         Revisions

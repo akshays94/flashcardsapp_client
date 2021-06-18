@@ -2,27 +2,35 @@
   <div>
     <div class="flex justify-between items-end mb-12">
       <BasePageTitle title="Decks" />
-      <BaseButton title="Create new deck" @on-clicked="addNewDeck()" />
+      <BaseButton
+        title="Create new deck"
+        button-color="green"
+        @on-clicked="addNewDeck()"
+      />
     </div>
 
-    <transition-group
-      v-if="isDecksLoaded"
-      enter-active-class="animate__animated animate__tada"
-      leave-active-class="animate__animated animate__fadeOutUp"
-      class="grid grid-cols-3 gap-12"
-    >
-      <div v-for="deck in decks" :key="deck.id">
-        <router-link
-          :to="{
-            name: 'PageDeckCards',
-            params: { deckId: deck.id },
-            query: { t: deck.title },
-          }"
-        >
-          <CardDeck :title="deck.title" />
-        </router-link>
-      </div>
-    </transition-group>
+    <section v-if="isDecksLoaded">
+      <transition-group
+        v-if="decks.length > 0"
+        enter-active-class="animate__animated animate__tada"
+        leave-active-class="animate__animated animate__fadeOutUp"
+        class="grid grid-cols-3 gap-12"
+      >
+        <div v-for="deck in decks" :key="deck.id">
+          <router-link
+            :to="{
+              name: 'PageDeckCards',
+              params: { deckId: deck.id },
+              query: { t: deck.title },
+            }"
+          >
+            <CardDeck :title="deck.title" />
+          </router-link>
+        </div>
+      </transition-group>
+
+      <div v-else>No decks added</div>
+    </section>
 
     <div v-else>Loading decks ...</div>
   </div>
@@ -40,7 +48,7 @@ export default {
   components: {
     CardDeck,
     BaseButton,
-    BasePageTitle
+    BasePageTitle,
   },
   computed: {
     ...Vuex.mapGetters({

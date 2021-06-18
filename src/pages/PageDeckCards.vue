@@ -2,6 +2,7 @@
   <section class="pt-6">
     <BaseButton
       title="Add new card to this deck"
+      button-color="green"
       @on-clicked="openAddNewCardForm()"
     />
 

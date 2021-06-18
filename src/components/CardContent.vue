@@ -5,7 +5,7 @@
     </button>
     <div class="text-3xl font-bold mb-4">{{ title }}</div>
 
-    <div v-html="parsedContent"></div>
+    <div class="markdown" v-html="parsedContent"></div>
   </div>
 </template>
 
