@@ -1,54 +1,109 @@
 <template>
   <div>
-    <router-link tag="button" :to="{ name: 'PageHome' }" class="mb-4">
+    <b-sidebar
+      type="is-light"
+      fullheight
+      overlay
+      right
+      v-model="isCardSidebarOpen"
+      :can-cancel="false"
+    >
+      <CardContent />
+    </b-sidebar>
+
+    <router-link
+      tag="button"
+      :to="{ name: 'PageHome' }"
+      class="mb-4 text-gray-400 underline outline-none select-none"
+    >
       Go Back
     </router-link>
 
-    <div class="text-5xl mb-8">{{ deckTitle }}</div>
+    <BasePageTitle :title="deckTitle" />
 
-    <div
-      v-if="isDeckCardsLoaded && deckCards.length > 0"
-      class="grid grid-cols-3 gap-6"
-    >
-      <div v-for="card in deckCards" :key="card.id">
-        <CardDeckCard :title="card.title" />
+    <div class="mt-4 mb-6 text-gray-500">
+      <div>Created on: 12 Jun 2021 | Cards in this deck: 0</div>
+    </div>
+
+    <div class="bg-purple-700 border-b-4 border-black p-2 flex rounded-lg ">
+      <div
+        class="font-bold text-lg text-white py-1 px-4 rounded-full cursor-pointer"
+        :class="{ 'bg-purple-500': tabCardsActive }"
+        @click="tabChange('cards')"
+      >
+        Cards
+      </div>
+      <div
+        class="font-bold text-lg text-white py-1 px-4 rounded-full cursor-pointer ml-4"
+        :class="{ 'bg-purple-500': tabRevisionsActive }"
+        @click="tabChange('revisions')"
+      >
+        Revisions
       </div>
     </div>
 
-    <div v-else-if="isDeckCardsLoaded && deckCards.length === 0">
-      No cards added to this deck
-    </div>
-
-    <div v-else>Loading cards ...</div>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
 import Vuex from "vuex";
-import CardDeckCard from "@/components/CardDeckCard.vue";
+import BasePageTitle from "@/components/BasePageTitle.vue";
+import CardContent from "@/components/CardContent.vue";
 
 export default {
   components: {
-    CardDeckCard,
+    BasePageTitle,
+    CardContent,
   },
-  data() {
-    return {
-      deckTitle: "",
-    };
-  },
+
   computed: {
     ...Vuex.mapGetters({
-      isDeckCardsLoaded: "getIsDeckCardsLoaded",
-      deckCards: "getDeckCards",
+      isCardSidebarOpen: "getIsCardSidebarOpen",
     }),
   },
-  created() {
-    this.deckTitle = this.$route.query.t;
-    const deckId = this.$route.params.deckId;
-    this.loadDeckCards(deckId);
+
+  data() {
+    return {
+      deckId: null,
+      deckTitle: "",
+      tabCardsActive: false,
+      tabRevisionsActive: false,
+      sidebarOpen: false,
+    };
   },
+
+  created() {
+    window.scrollTo(0, 0); // scroll to top on page load
+    if (this.$route.name === "PageDeckCards") {
+      this.tabCardsActive = true;
+    } else if (this.$route.name === "PageDeckRevisions") {
+      this.tabRevisionsActive = true;
+    }
+    this.deckTitle = this.$route.query.t;
+    this.deckId = this.$route.params.deckId;
+  },
+
   methods: {
-    ...Vuex.mapActions(["loadDeckCards"]),
+    tabChange(tabName) {
+      let routeName = "";
+      if (tabName === "cards") {
+        routeName = "PageDeckCards";
+        this.tabCardsActive = true;
+        this.tabRevisionsActive = false;
+      } else {
+        routeName = "PageDeckRevisions";
+        this.tabCardsActive = false;
+        this.tabRevisionsActive = true;
+      }
+      const deckId = this.deckId;
+      const deckTitle = this.deckTitle;
+      this.$router.replace({
+        name: routeName,
+        params: { deckId },
+        query: { t: deckTitle },
+      });
+    },
   },
 };
 </script>

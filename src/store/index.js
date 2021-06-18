@@ -16,6 +16,12 @@ const getDefaultState = () => {
     decks: [],
     isDeckCardsLoaded: false,
     deckCards: [],
+
+    isCardSidebarOpen: false,
+    selectedCard: {
+      title: "",
+      content: "",
+    },
   };
 };
 
@@ -25,10 +31,16 @@ export default new Vuex.Store({
   getters: {
     getName: (state) => (state.auth.user ? state.auth.user.name : ""),
     hasToken: (state) => state.auth.token !== null,
+
     getIsDecksLoaded: (state) => state.isDecksLoaded,
     getDecks: (state) => state.decks,
+
     getIsDeckCardsLoaded: (state) => state.isDeckCardsLoaded,
     getDeckCards: (state) => state.deckCards,
+
+    getIsCardSidebarOpen: (state) => state.isCardSidebarOpen,
+    getSelectedCardTitle: (state) => state.selectedCard.title,
+    getSelectedCardContent: (state) => state.selectedCard.content,
   },
 
   mutations: {
@@ -48,6 +60,13 @@ export default new Vuex.Store({
     SET_IS_DECK_CARDS_LOADED: (state, payload) =>
       (state.isDeckCardsLoaded = payload),
     SET_DECK_CARDS: (state, payload) => (state.deckCards = payload),
+
+    SET_IS_CARD_SIDEBAR_OPEN: (state, payload) =>
+      (state.isCardSidebarOpen = payload),
+    SET_SELECTED_CARD_TITLE: (state, payload) =>
+      (state.selectedCard.title = payload),
+    SET_SELECTED_CARD_CONTENT: (state, payload) =>
+      (state.selectedCard.content = payload),
   },
 
   actions: {
@@ -115,6 +134,24 @@ export default new Vuex.Store({
           creationToast = null;
         }
       }
+    },
+
+    resetDeckCards({ commit }) {
+      commit("SET_IS_DECK_CARDS_LOADED", false);
+      commit("SET_DECK_CARDS", []);
+    },
+
+    openSelectedCard({ commit }, payload) {
+      const { title, content } = payload;
+      commit("SET_SELECTED_CARD_TITLE", title);
+      commit("SET_SELECTED_CARD_CONTENT", content);
+      commit("SET_IS_CARD_SIDEBAR_OPEN", true);
+    },
+
+    closeSelectedCard({ commit }) {
+      commit("SET_SELECTED_CARD_TITLE", "");
+      commit("SET_SELECTED_CARD_CONTENT", "");
+      commit("SET_IS_CARD_SIDEBAR_OPEN", false);
     },
   },
 });

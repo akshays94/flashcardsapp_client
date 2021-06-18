@@ -3,8 +3,11 @@
     <header class="bg-purple-900 p-4">
       <div class="flex justify-between max-w-5xl mx-auto">
         <div class="logo text-white font-bold">FLASHLEARN</div>
-        <div class="text-white">
-          {{ name }}
+        <div class="flex">
+          <div class="text-white">
+            Logged in as {{ name }}
+          </div>
+          <button class="ml-4 text-white underline">Logout</button>
         </div>
       </div>
     </header>

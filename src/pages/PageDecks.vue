@@ -1,17 +1,20 @@
 <template>
   <div>
     <div class="flex justify-between items-end mb-12">
-      <div class="text-5xl font-bold animate__animated animate__bounce">
-        Decks
-      </div>
+      <BasePageTitle title="Decks" />
       <BaseButton title="Create new deck" @on-clicked="addNewDeck()" />
     </div>
 
-    <div v-if="isDecksLoaded" class="grid grid-cols-3 gap-12">
+    <transition-group
+      v-if="isDecksLoaded"
+      enter-active-class="animate__animated animate__tada"
+      leave-active-class="animate__animated animate__fadeOutUp"
+      class="grid grid-cols-3 gap-12"
+    >
       <div v-for="deck in decks" :key="deck.id">
         <router-link
           :to="{
-            name: 'PageDeck',
+            name: 'PageDeckCards',
             params: { deckId: deck.id },
             query: { t: deck.title },
           }"
@@ -19,7 +22,7 @@
           <CardDeck :title="deck.title" />
         </router-link>
       </div>
-    </div>
+    </transition-group>
 
     <div v-else>Loading decks ...</div>
   </div>
@@ -29,11 +32,13 @@
 import Vuex from "vuex";
 import CardDeck from "@/components/CardDeck.vue";
 import BaseButton from "@/components/BaseButton.vue";
+import BasePageTitle from "@/components/BasePageTitle.vue";
 
 export default {
   components: {
     CardDeck,
     BaseButton,
+    BasePageTitle
   },
   computed: {
     ...Vuex.mapGetters({
@@ -45,9 +50,10 @@ export default {
     if (this.decks.length === 0) {
       this.loadDecks();
     }
+    this.resetDeckCards();
   },
   methods: {
-    ...Vuex.mapActions(["loadDecks", "createDeck"]),
+    ...Vuex.mapActions(["loadDecks", "createDeck", "resetDeckCards"]),
 
     addNewDeck() {
       this.$buefy.dialog.prompt({
@@ -59,7 +65,6 @@ export default {
         },
         trapFocus: true,
         onConfirm: async (title) => {
-          // this.$buefy.toast.open(`Your name is: ${value}`)
           await this.createDeck({ title });
         },
       });

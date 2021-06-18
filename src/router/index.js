@@ -8,6 +8,8 @@ import PageNotFound from "@/pages/PageNotFound.vue";
 import PageHome from "@/pages/PageHome.vue";
 import PageDecks from "@/pages/PageDecks.vue";
 import PageDeck from "@/pages/PageDeck.vue";
+import PageDeckCards from "@/pages/PageDeckCards.vue";
+import PageDeckRevisions from "@/pages/PageDeckRevisions.vue";
 
 Vue.use(VueRouter);
 
@@ -17,7 +19,22 @@ const routes = [
     component: PageHome,
     children: [
       { path: "/", name: "PageHome", component: PageDecks },
-      { path: "/decks/:deckId", name: "PageDeck", component: PageDeck },
+      {
+        path: "/decks",
+        component: PageDeck,
+        children: [
+          {
+            path: "/decks/:deckId/cards",
+            name: "PageDeckCards",
+            component: PageDeckCards,
+          },
+          {
+            path: "/decks/:deckId/revisions",
+            name: "PageDeckRevisions",
+            component: PageDeckRevisions,
+          },
+        ],
+      },
     ],
   },
   { path: "/login", name: "PageLogin", component: PageLogin },
@@ -57,11 +74,12 @@ router.beforeEach(async (to, from, next) => {
       }
     }
   } else {
-    if (isNoTokenInStorage) {
-      next();
-    } else {
-      next({ name: "PageHome" });
-    }
+    // if (isNoTokenInStorage) {
+    //   next();
+    // } else {
+    //   next({ name: "PageHome" });
+    // }
+    next();
   }
 });
 
