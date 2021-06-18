@@ -11,6 +11,17 @@
       <CardContent />
     </b-sidebar>
 
+    <b-sidebar
+      type="is-light"
+      fullheight
+      overlay
+      right
+      v-model="isCardFormSidebarOpen"
+      :can-cancel="false"
+    >
+      <FormCard :deckId="deckId" />
+    </b-sidebar>
+
     <router-link
       tag="button"
       :to="{ name: 'PageHome' }"
@@ -42,7 +53,13 @@
       </div>
     </div>
 
-    <router-view></router-view>
+    <transition
+      mode="out-in"
+      enter-active-class="animate__animated animate__fadeIn animate__faster"
+      leave-active-class="animate__animated animate__fadeOut animate__faster"
+    >
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 
@@ -50,16 +67,19 @@
 import Vuex from "vuex";
 import BasePageTitle from "@/components/BasePageTitle.vue";
 import CardContent from "@/components/CardContent.vue";
+import FormCard from "@/components/FormCard.vue";
 
 export default {
   components: {
     BasePageTitle,
     CardContent,
+    FormCard,
   },
 
   computed: {
     ...Vuex.mapGetters({
       isCardSidebarOpen: "getIsCardSidebarOpen",
+      isCardFormSidebarOpen: "getIsCardFormSidebarOpen",
     }),
   },
 
@@ -82,6 +102,7 @@ export default {
     }
     this.deckTitle = this.$route.query.t;
     this.deckId = this.$route.params.deckId;
+    document.title = this.deckTitle;
   },
 
   methods: {

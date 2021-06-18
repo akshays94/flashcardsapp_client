@@ -2,7 +2,12 @@ import Vue from "vue";
 import Vuex from "vuex";
 
 import { loginAPI, validateTokenAPI } from "@/endpoints/auth";
-import { getDecksAPI, getDeckCardsAPI, createDeckAPI } from "@/endpoints/deck";
+import {
+  getDecksAPI,
+  getDeckCardsAPI,
+  createDeckAPI,
+  createCardInDeckAPI,
+} from "@/endpoints/deck";
 
 Vue.use(Vuex);
 
@@ -19,6 +24,12 @@ const getDefaultState = () => {
 
     isCardSidebarOpen: false,
     selectedCard: {
+      title: "",
+      content: "",
+    },
+
+    isCardFormSidebarOpen: false,
+    formCard: {
       title: "",
       content: "",
     },
@@ -41,6 +52,10 @@ export default new Vuex.Store({
     getIsCardSidebarOpen: (state) => state.isCardSidebarOpen,
     getSelectedCardTitle: (state) => state.selectedCard.title,
     getSelectedCardContent: (state) => state.selectedCard.content,
+
+    getIsCardFormSidebarOpen: (state) => state.isCardFormSidebarOpen,
+    getFormCardTitle: (state) => state.formCard.title,
+    getFormCardContent: (state) => state.formCard.content,
   },
 
   mutations: {
@@ -50,6 +65,7 @@ export default new Vuex.Store({
     SET_AUTH_USER: (state, user) => {
       Vue.set(state.auth, "user", user);
     },
+
     SET_IS_DECKS_LOADED: (state, payload) => (state.isDecksLoaded = payload),
     SET_DECKS: (state, payload) => (state.decks = payload),
     ADD_DECK_CARD: (state, payload) => {
@@ -57,9 +73,15 @@ export default new Vuex.Store({
       decks.unshift(payload);
       Vue.set(state, "decks", decks);
     },
+
     SET_IS_DECK_CARDS_LOADED: (state, payload) =>
       (state.isDeckCardsLoaded = payload),
     SET_DECK_CARDS: (state, payload) => (state.deckCards = payload),
+    ADD_CARD_TO_DECK: (state, payload) => {
+      const cards = [...state.deckCards];
+      cards.push(payload);
+      Vue.set(state, "deckCards", cards);
+    },
 
     SET_IS_CARD_SIDEBAR_OPEN: (state, payload) =>
       (state.isCardSidebarOpen = payload),
@@ -67,6 +89,12 @@ export default new Vuex.Store({
       (state.selectedCard.title = payload),
     SET_SELECTED_CARD_CONTENT: (state, payload) =>
       (state.selectedCard.content = payload),
+
+    SET_IS_CARD_FORM_SIDEBAR_OPEN: (state, payload) =>
+      (state.isCardFormSidebarOpen = payload),
+    SET_FORM_CARD_TITLE: (state, payload) => (state.formCard.title = payload),
+    SET_FORM_CARD_CONTENT: (state, payload) =>
+      (state.formCard.content = payload),
   },
 
   actions: {
@@ -82,6 +110,13 @@ export default new Vuex.Store({
         return { success: true };
       }
       return { success: false };
+    },
+
+    authLogout({ commit }) {
+      commit("SET_AUTH_TOKEN", null);
+      commit("SET_AUTH_USER", null);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
     },
 
     async authSetUserFromToken({ commit }) {
@@ -152,6 +187,38 @@ export default new Vuex.Store({
       commit("SET_SELECTED_CARD_TITLE", "");
       commit("SET_SELECTED_CARD_CONTENT", "");
       commit("SET_IS_CARD_SIDEBAR_OPEN", false);
+    },
+
+    openCardFormForAdd({ commit }) {
+      commit("SET_IS_CARD_FORM_SIDEBAR_OPEN", true);
+    },
+
+    closeCardFormForAdd({ commit }) {
+      commit("SET_IS_CARD_FORM_SIDEBAR_OPEN", false);
+      commit("SET_FORM_CARD_TITLE", "");
+      commit("SET_FORM_CARD_CONTENT", "");
+    },
+
+    async createCardInDeck({ getters, commit, dispatch }, deckId) {
+      const title = getters["getFormCardTitle"];
+      const content = getters["getFormCardContent"];
+      let creationToast = this._vm.$buefy.toast.open({
+        indefinite: true,
+        message: `Creating card ... Please wait ...`,
+        type: "is-success",
+      });
+      const response = await createCardInDeckAPI(deckId, {
+        title,
+        content,
+      });
+      if (response.status === 200) {
+        if (creationToast) {
+          creationToast.close();
+          creationToast = null;
+        }
+        dispatch("closeCardFormForAdd");
+        commit("ADD_CARD_TO_DECK", response.data);
+      }
     },
   },
 });

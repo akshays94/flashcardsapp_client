@@ -35,6 +35,8 @@ import BaseButton from "@/components/BaseButton.vue";
 import BasePageTitle from "@/components/BasePageTitle.vue";
 
 export default {
+  title: "Decks",
+
   components: {
     CardDeck,
     BaseButton,
