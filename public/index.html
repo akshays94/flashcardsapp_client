@@ -7,11 +7,27 @@
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title>Flashlearn</title>
   </head>
+  <style>
+    .loading-app-container {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5em;
+      font-family: 'Ubuntu';
+      color: lightgray;
+    }
+  </style>
   <body>
     <noscript>
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
-    <div id="app"></div>
+    <div id="app">
+      <div class="loading-app-container">
+        Loading app ...
+      </div>
+    </div>
     <!-- built files will be auto injected -->
   </body>
+
 </html>

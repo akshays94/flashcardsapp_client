@@ -3,6 +3,7 @@
     <BaseButton
       title="Start today's revision session"
       button-color="yellow"
+      @on-clicked="startRevision()"
     />
 
     <section class="pt-4">
@@ -12,21 +13,41 @@
 </template>
 
 <script>
+import Vuex from "vuex";
 import BaseButton from "@/components/BaseButton.vue";
 
 export default {
   components: {
-    BaseButton
+    BaseButton,
   },
   data() {
     return {
-      sessions: [
-        {
-          id: 1,
-          sessionDate: "21/02/2020",
-        }
-      ]
-    }
-  }
-}
+      deckId: null,
+    };
+  },
+
+  created() {
+    this.deckId = this.$route.params.deckId;
+  },
+
+  computed: {
+    ...Vuex.mapGetters({
+      sessionId: "getSessionId",
+    }),
+  },
+
+  methods: {
+    ...Vuex.mapActions(["startSession"]),
+
+    async startRevision() {
+      const result = await this.startSession(this.deckId);
+      if (result.success) {
+        this.$router.replace({
+          name: "PageRevisionSession",
+          params: { sessionId: this.sessionId },
+        });
+      }
+    },
+  },
+};
 </script>

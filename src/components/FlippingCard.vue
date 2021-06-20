@@ -11,7 +11,9 @@
       @click="$emit('on-clicked')"
     >
       <div class="flip-card-inner" :class="{ 'rotate-card': isRevealCard }">
-        <div class="flip-card-front front-card-design hover:underline">
+        <div
+          class="flip-card-front front-card-design hover:underline font-bold"
+        >
           {{ cardTitle }}
         </div>
         <div class="flip-card-back back-card-design text-left p-4">
@@ -30,7 +32,9 @@
       enter-active-class="animate__animated animate__flipInX animate__slow"
     >
       <div v-show="isLoadingNewCard" class="flip-card front-card-design">
-        Loading card ... Please wait ...
+        <span class="animate__animated animate__pulse animate__infinite">
+          Loading card ... Please wait ...
+        </span>
       </div>
     </transition>
   </section>

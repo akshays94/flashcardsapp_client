@@ -102,7 +102,7 @@ export default {
     }
     this.deckTitle = this.$route.query.t;
     this.deckId = this.$route.params.deckId;
-    document.title = this.deckTitle;
+    document.title = `${this.deckTitle} - Flashlearn`;
   },
 
   methods: {

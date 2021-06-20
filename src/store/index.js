@@ -7,6 +7,10 @@ import {
   getDeckCardsAPI,
   createDeckAPI,
   createCardInDeckAPI,
+  startRevisionAPI,
+  retrieveSessionAPI,
+  getNextCardAPI,
+  moveCardAPI,
 } from "@/endpoints/deck";
 
 Vue.use(Vuex);
@@ -33,6 +37,15 @@ const getDefaultState = () => {
       title: "",
       content: "",
     },
+
+    session: {
+      id: null,
+      title: null,
+      date: null,
+    },
+
+    sessionNextCard: null,
+    isSessionLoadingNewCard: true,
   };
 };
 
@@ -56,6 +69,19 @@ export default new Vuex.Store({
     getIsCardFormSidebarOpen: (state) => state.isCardFormSidebarOpen,
     getFormCardTitle: (state) => state.formCard.title,
     getFormCardContent: (state) => state.formCard.content,
+
+    getSessionId: (state) => state.session.id,
+    getSessionTitle: (state) => state.session.title,
+    getSessionDate: (state) => state.session.date,
+
+    getIsSessionLoadingNewCard: (state) => state.isSessionLoadingNewCard,
+
+    getSessionCardId: (state) =>
+      state.sessionNextCard ? state.sessionNextCard.card.card_id : "",
+    getSessionCardTitle: (state) =>
+      state.sessionNextCard ? state.sessionNextCard.card.title : "",
+    getSessionCardContents: (state) =>
+      state.sessionNextCard ? state.sessionNextCard.card.content : "",
   },
 
   mutations: {
@@ -99,6 +125,16 @@ export default new Vuex.Store({
     SET_FORM_CARD_TITLE: (state, payload) => (state.formCard.title = payload),
     SET_FORM_CARD_CONTENT: (state, payload) =>
       (state.formCard.content = payload),
+
+    SET_SESSION_ID: (state, payload) => (state.session.id = payload),
+    SET_SESSION_TITLE: (state, payload) => (state.session.title = payload),
+    SET_SESSION_DATE: (state, payload) => (state.session.date = payload),
+
+    SET_IS_SESSION_LOADING_NEW_CARD: (state, payload) =>
+      (state.isSessionLoadingNewCard = payload),
+
+    SET_SESSION_NEXT_CARD: (state, payload) =>
+      (state.sessionNextCard = payload),
   },
 
   actions: {
@@ -229,6 +265,69 @@ export default new Vuex.Store({
         }
         dispatch("closeCardFormForAdd");
         commit("ADD_CARD_TO_DECK", response.data);
+      }
+    },
+
+    async retrieveSession({ commit }, sessionId) {
+      let creationToast = this._vm.$buefy.toast.open({
+        indefinite: true,
+        message: `Fetching session information ... Please wait ...`,
+        type: "is-success",
+      });
+      const response = await retrieveSessionAPI(sessionId);
+      if (response.status === 200) {
+        const data = response.data;
+        commit("SET_SESSION_ID", data.id);
+        commit("SET_SESSION_TITLE", data.title);
+        commit("SET_SESSION_DATE", data.session_date);
+        if (creationToast) {
+          creationToast.close();
+          creationToast = null;
+        }
+        return { success: true };
+      }
+    },
+
+    async startSession({ commit }, deckId) {
+      let creationToast = this._vm.$buefy.toast.open({
+        indefinite: true,
+        message: `Starting session ... Please wait ...`,
+        type: "is-success",
+      });
+      const response = await startRevisionAPI(deckId);
+      if (response.status === 200) {
+        const data = response.data;
+        commit("SET_SESSION_ID", data.id);
+        commit("SET_SESSION_TITLE", data.title);
+        commit("SET_SESSION_DATE", data.session_date);
+        if (creationToast) {
+          creationToast.close();
+          creationToast = null;
+        }
+        return { success: true };
+      }
+    },
+
+    async getNextCard({ commit }, sessionId) {
+      commit("SET_IS_SESSION_LOADING_NEW_CARD", true);
+      const response = await getNextCardAPI(sessionId);
+      if (response.status === 200) {
+        commit("SET_SESSION_NEXT_CARD", response.data);
+        commit("SET_IS_SESSION_LOADING_NEW_CARD", false);
+        return { success: true };
+      }
+    },
+
+    async moveCard({ getters }, isCorrect) {
+      const sessionId = getters["getSessionId"];
+      const cardId = getters["getSessionCardId"];
+      // commit("SET_IS_SESSION_LOADING_NEW_CARD", true);
+      const response = await moveCardAPI(sessionId, {
+        card_id: cardId,
+        is_correct: isCorrect,
+      });
+      if (response.status === 200) {
+        return { success: true };
       }
     },
   },

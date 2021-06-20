@@ -64,7 +64,7 @@
       <div class="separator my-4">OR</div>
 
       <div>
-        <BaseButton title="Login as guest" @on-clicked="loginAsGuest()" />
+        <BaseButton title="Try out the app" @on-clicked="loginAsGuest()" />
       </div>
     </div>
   </div>
