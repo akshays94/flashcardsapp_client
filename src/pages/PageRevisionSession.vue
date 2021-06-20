@@ -27,9 +27,14 @@
       </section>
 
       <section v-if="!isLoadingNewCard" class="flex justify-center mt-4">
-        <div v-if="!isRevealCard" class="flex">
-          <div class="text-2xl">Try to recall then flip</div>
-          <img class="w-8 ml-2" src="../assets/click.gif" alt="" />
+        <div v-if="!isRevealCard">
+          <div class="flex">
+            <div class="text-2xl">Try to recall then flip</div>
+            <img class="w-8 ml-2" src="../assets/click.gif" alt="" />
+          </div>
+          <div class="text-center mt-4 text-gray-500 font-bold">
+            Cards remaining: {{ remainingCardsCount }}
+          </div>
         </div>
 
         <section v-else>
@@ -92,14 +97,20 @@ export default {
 
       cardTitle: "getSessionCardTitle",
       cardContents: "getSessionCardContents",
+      remainingCardsCount: "getSessionRemainingCards",
     }),
     isLoadingNewCard: {
-      get() { return this.$store.getters["getIsSessionLoadingNewCard"] },
-      set(val) { this.$store.commit("SET_IS_SESSION_LOADING_NEW_CARD", val) }
-    }
+      get() {
+        return this.$store.getters["getIsSessionLoadingNewCard"];
+      },
+      set(val) {
+        this.$store.commit("SET_IS_SESSION_LOADING_NEW_CARD", val);
+      },
+    },
   },
 
   async created() {
+    window.scrollTo(0, 0); // scroll to top on page load
     const pageSessionId = this.$route.params.sessionId;
     if (!this.sessionId) {
       await this.retrieveSession(pageSessionId);

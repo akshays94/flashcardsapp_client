@@ -82,6 +82,8 @@ export default new Vuex.Store({
       state.sessionNextCard ? state.sessionNextCard.card.title : "",
     getSessionCardContents: (state) =>
       state.sessionNextCard ? state.sessionNextCard.card.content : "",
+    getSessionRemainingCards: (state) =>
+      state.sessionNextCard ? state.sessionNextCard.remaining_cards : 0,
   },
 
   mutations: {
@@ -265,6 +267,8 @@ export default new Vuex.Store({
         }
         dispatch("closeCardFormForAdd");
         commit("ADD_CARD_TO_DECK", response.data);
+        commit("SET_FORM_CARD_TITLE", "");
+        commit("SET_FORM_CARD_CONTENT", "");
       }
     },
 

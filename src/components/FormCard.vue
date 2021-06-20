@@ -18,7 +18,11 @@
     </section>
 
     <section>
-      <BaseButton title="Save" @on-clicked="saveForm()" />
+      <BaseButton
+        title="Save"
+        :disabled="isFormDisabled"
+        @on-clicked="saveForm()"
+      />
 
       <BaseButton
         title="Close"
@@ -46,6 +50,12 @@ export default {
     },
   },
 
+  data() {
+    return {
+      isFormDisabled: false,
+    };
+  },
+
   computed: {
     title: {
       get() {
@@ -69,8 +79,20 @@ export default {
   methods: {
     ...Vuex.mapActions(["closeCardFormForAdd", "createCardInDeck"]),
 
-    saveForm() {
-      this.createCardInDeck(this.deckId);
+    async saveForm() {
+      const title = this.title.trim();
+      const content = this.content.trim();
+      if (title.length > 0 && content.length > 0) {
+        this.isFormDisabled = true;
+        await this.createCardInDeck(this.deckId);
+        this.isFormDisabled = false;
+      } else {
+        this.$buefy.toast.open({
+          indefinite: false,
+          message: `Title and content are required fields`,
+          type: "is-danger",
+        });
+      }
     },
   },
 };
