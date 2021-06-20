@@ -8,6 +8,8 @@
         buttonColor === 'green',
       'bg-red-500 hover:bg-red-400 border-red-700 hover:border-red-500':
         buttonColor === 'red',
+      'bg-yellow-500 hover:bg-yellow-400 border-yellow-700 hover:border-yellow-500':
+        buttonColor === 'yellow',
     }"
     @click="$emit('on-clicked')"
   >

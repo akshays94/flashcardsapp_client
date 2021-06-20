@@ -10,6 +10,7 @@ import PageDecks from "@/pages/PageDecks.vue";
 import PageDeck from "@/pages/PageDeck.vue";
 import PageDeckCards from "@/pages/PageDeckCards.vue";
 import PageDeckRevisions from "@/pages/PageDeckRevisions.vue";
+import PageRevisionSession from "@/pages/PageRevisionSession.vue";
 
 Vue.use(VueRouter);
 
@@ -34,6 +35,11 @@ const routes = [
             component: PageDeckRevisions,
           },
         ],
+      },
+      {
+        path: "/sessions/:sessionId",
+        name: "PageRevisionSession",
+        component: PageRevisionSession,
       },
     ],
   },

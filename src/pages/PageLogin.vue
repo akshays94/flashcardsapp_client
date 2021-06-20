@@ -56,7 +56,7 @@
             class="ml-4 underline hover:no-underline cursor-pointer"
             @click="resetForm()"
           >
-            Reset
+            Go back
           </div>
         </div>
       </section>
