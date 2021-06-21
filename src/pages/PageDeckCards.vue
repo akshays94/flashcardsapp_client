@@ -13,7 +13,7 @@
     <div class="mt-4" v-else>
       <transition-group
         v-if="deckCards.length > 0"
-        class="grid grid-cols-3 gap-6"
+        class="grid md:grid-cols-3 gap-6"
         enter-active-class="animate__animated animate__tada"
         leave-active-class="animate__animated animate__fadeOutUp"
       >

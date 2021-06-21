@@ -1,8 +1,10 @@
 <template>
   <div>
-    <div class="flex justify-between items-end mb-12">
+    <div class="flex flex-col items-start md:flex-row md:justify-between md:items-end mb-12">
       <BasePageTitle title="Decks" />
+
       <BaseButton
+        class="mt-4 md:mt-0"
         title="Create new deck"
         button-color="green"
         @on-clicked="addNewDeck()"
@@ -14,7 +16,7 @@
         v-if="decks.length > 0"
         enter-active-class="animate__animated animate__tada"
         leave-active-class="animate__animated animate__fadeOutUp"
-        class="grid grid-cols-3 gap-12"
+        class="grid md:grid-cols-3 gap-12"
       >
         <div v-for="deck in decks" :key="deck.id">
           <router-link

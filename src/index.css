@@ -8,9 +8,11 @@ body {
 }
 
 .sidebar-content {
-  width: 40% !important;
+  width: 95% !important;
 }
 
-/* .markdown h1 {
-  border: 1px solid red;
-} */
+@media (min-width: 768px) {
+  .sidebar-content {
+    width: 40% !important;
+  }
+}

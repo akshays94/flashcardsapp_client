@@ -1,7 +1,9 @@
 <template>
   <header class="bg-purple-900 border-b-4 border-gray-400 p-2">
     <div class="flex justify-between items-center max-w-5xl mx-auto">
-      <div class="logo text-white font-bold text-2xl">FLASHLEARN</div>
+      <div class="logo text-white font-bold text-2xl text-center">
+        FLASHLEARN
+      </div>
 
       <div class="flex items-baseline">
         <div class="text-white select-none">Logged in as {{ name }}</div>

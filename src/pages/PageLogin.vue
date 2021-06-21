@@ -1,7 +1,7 @@
 <template>
   <div class="h-screen flex justify-center items-center">
     <div
-      class="bg-white w-2/5 py-6 px-6 shadow-xl hover:shadow-2xl transition-all duration-300"
+      class="bg-white w-full mx-4 px-5 py-6 md:w-2/5 md:p-6 shadow-xl hover:shadow-2xl transition-all duration-300"
     >
       <header class="text-3xl font-bold mb-5">FLASHLEARN</header>
 
@@ -14,14 +14,18 @@
           <b-input type="password" v-model="loginPassword"></b-input>
         </b-field>
 
-        <div class="flex items-center" style="margin-top: 24px;">
+        <div
+          class="flex flex-col md:items-center md:flex-row"
+          style="margin-top: 24px;"
+        >
           <BaseButton
             title="Log In"
             button-color="green"
             @on-clicked="login()"
           />
+
           <div
-            class="ml-4 underline hover:no-underline cursor-pointer"
+            class="ml-4 mt-4 md:mt-0 underline hover:no-underline cursor-pointer"
             @click="isLoginContainerOpen = false"
           >
             Create new account (no email required)

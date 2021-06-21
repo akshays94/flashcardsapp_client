@@ -3,7 +3,7 @@
     <BaseHeader />
 
     <section
-      class="max-w-5xl mx-auto bg-white mt-6 mb-12 p-12 min-h-screen shadow-sm pb-64"
+      class="max-w-5xl mx-auto bg-white mt-6 mb-12 p-8 md:p-12 min-h-screen shadow-sm pb-64"
     >
       <transition
         mode="out-in"
