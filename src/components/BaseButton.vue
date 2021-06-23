@@ -7,11 +7,11 @@
       'bg-purple-500 hover:bg-purple-400 border-purple-700 hover:border-purple-500':
         !disabled && buttonColor === 'purple',
       'bg-green-500 hover:bg-green-400 border-green-700 hover:border-green-500':
-        buttonColor === 'green',
+        !disabled && buttonColor === 'green',
       'bg-red-500 hover:bg-red-400 border-red-700 hover:border-red-500':
-        buttonColor === 'red',
+        !disabled && buttonColor === 'red',
       'bg-yellow-500 hover:bg-yellow-400 border-yellow-700 hover:border-yellow-500':
-        buttonColor === 'yellow',
+        !disabled && buttonColor === 'yellow',
     }"
     :disabled="disabled"
     @click="$emit('on-clicked')"

@@ -1,6 +1,8 @@
 <template>
   <div>
-    <div class="flex flex-col items-start md:flex-row md:justify-between md:items-end mb-12">
+    <div
+      class="flex flex-col items-start md:flex-row md:justify-between md:items-end mb-12"
+    >
       <BasePageTitle title="Decks" />
 
       <BaseButton
@@ -15,7 +17,7 @@
       <transition-group
         v-if="decks.length > 0"
         enter-active-class="animate__animated animate__tada"
-        leave-active-class="animate__animated animate__fadeOutUp"
+        leave-active-class="animate__animated animate__zoomOut"
         class="grid md:grid-cols-3 gap-12"
       >
         <div v-for="deck in decks" :key="deck.id">
@@ -26,7 +28,10 @@
               query: { t: deck.title },
             }"
           >
-            <CardDeck :title="deck.title" />
+            <CardDeck
+              :title="deck.title"
+              @delete-card="deleteCard(deck.id, deck.title)"
+            />
           </router-link>
         </div>
       </transition-group>
@@ -65,7 +70,12 @@ export default {
     this.resetDeckCards();
   },
   methods: {
-    ...Vuex.mapActions(["loadDecks", "createDeck", "resetDeckCards"]),
+    ...Vuex.mapActions([
+      "loadDecks",
+      "createDeck",
+      "resetDeckCards",
+      "deleteDeck",
+    ]),
 
     addNewDeck() {
       this.$buefy.dialog.prompt({
@@ -78,6 +88,18 @@ export default {
         trapFocus: true,
         onConfirm: async (title) => {
           await this.createDeck({ title });
+        },
+      });
+    },
+
+    deleteCard(deckId, deckTitle) {
+      console.log(deckId, "deletee");
+      this.$buefy.dialog.confirm({
+        message: `Delete ${deckTitle}?`,
+        confirmText: "Delete Deck",
+        type: "is-danger",
+        onConfirm: async () => {
+          await this.deleteDeck(deckId);
         },
       });
     },

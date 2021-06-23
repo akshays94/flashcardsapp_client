@@ -10,7 +10,7 @@
       Loading cards in this deck ...
     </div>
 
-    <div class="mt-4" v-else>
+    <div class="mt-6" v-else>
       <transition-group
         v-if="deckCards.length > 0"
         class="grid md:grid-cols-3 gap-6"

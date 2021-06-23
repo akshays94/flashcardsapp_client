@@ -10,6 +10,7 @@
       </router-link> -->
 
       <BasePageTitle :title="sessionTitle" />
+
       <div class="mt-2 text-gray-600">Session date: {{ sessionDate }}</div>
       <hr />
 
@@ -22,11 +23,15 @@
           :is-answered="isAnswered"
           :is-correct-answer="isCorrectAnswer"
           :is-loading-new-card="isLoadingNewCard"
+          :is-session-completed="isSessionCompleted"
           @on-clicked="!isRevealCard ? onRevealCardClick() : null"
         />
       </section>
 
-      <section v-if="!isLoadingNewCard" class="flex justify-center mt-4">
+      <section
+        v-if="!isLoadingNewCard && !isSessionCompleted"
+        class="flex justify-center mt-4"
+      >
         <div v-if="!isRevealCard">
           <div class="flex">
             <div class="text-2xl">Try to recall then flip</div>
@@ -48,7 +53,7 @@
             />
 
             <BaseButton
-              title="Yes, I remember"
+              title="Yes, I remembered"
               button-color="green"
               class="ml-4"
               @on-clicked="onYesClick()"
@@ -58,10 +63,28 @@
               title="I'm done for the day"
               button-color="purple"
               class="ml-4"
-              @on-clicked="onYesClick()"
+              @on-clicked="onDoneForTheDayClick()"
             />
           </div>
         </section>
+      </section>
+
+      <section
+        v-if="!isLoadingNewCard && isSessionCompleted"
+        class="flex justify-center mt-4"
+      >
+        <BaseButton
+          title="Go back!"
+          button-color="purple"
+          class="ml-4"
+          @on-clicked="
+            $router.replace({
+              name: 'PageDeckRevisions',
+              params: { deckId: sessionDeckId },
+              query: { t: sessionTitle },
+            })
+          "
+        />
       </section>
     </section>
   </section>
@@ -94,10 +117,12 @@ export default {
       sessionId: "getSessionId",
       sessionTitle: "getSessionTitle",
       sessionDate: "getSessionDate",
+      sessionDeckId: "getSessionDeckId",
 
       cardTitle: "getSessionCardTitle",
       cardContents: "getSessionCardContents",
       remainingCardsCount: "getSessionRemainingCards",
+      isSessionCompleted: "getIsSessionCompleted",
     }),
     isLoadingNewCard: {
       get() {
@@ -119,7 +144,12 @@ export default {
   },
 
   methods: {
-    ...Vuex.mapActions(["retrieveSession", "getNextCard", "moveCard"]),
+    ...Vuex.mapActions([
+      "retrieveSession",
+      "getNextCard",
+      "moveCard",
+      "markSessionAsComplete",
+    ]),
 
     onRevealCardClick() {
       this.isRevealCard = true;
@@ -154,6 +184,23 @@ export default {
         await this.moveCard(false);
         await this.getNextCard(this.sessionId);
       }, 1500);
+    },
+
+    onDoneForTheDayClick() {
+      this.$buefy.dialog.confirm({
+        message:
+          "Are you done for the day? If yes then you will be able to continue this session tomorrow",
+        cancelText: "No",
+        confirmText: "Yes",
+        onConfirm: async () => {
+          await this.markSessionAsComplete(this.sessionId);
+          this.$router.replace({
+            name: "PageDeckRevisions",
+            params: { deckId: this.sessionDeckId },
+            query: { t: this.sessionTitle },
+          });
+        },
+      });
     },
   },
 };

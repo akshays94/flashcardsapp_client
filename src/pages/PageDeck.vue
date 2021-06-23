@@ -33,7 +33,10 @@
     <BasePageTitle :title="deckTitle" />
 
     <div class="mt-4 mb-6 text-gray-500">
-      <div>Created on: 12 Jun 2021 | Cards in this deck: 0</div>
+      <div>
+        Created on: {{ parsedDeckCreatedOn }} | Cards in this deck:
+        {{ deckCardsCount }}
+      </div>
     </div>
 
     <div class="bg-purple-700 border-b-4 border-black p-2 flex rounded-lg ">
@@ -80,7 +83,15 @@ export default {
     ...Vuex.mapGetters({
       isCardSidebarOpen: "getIsCardSidebarOpen",
       isCardFormSidebarOpen: "getIsCardFormSidebarOpen",
+      deckCardsCount: "getDeckCardsCount",
+      deckCreatedOn: "getDeckCreatedOn",
     }),
+
+    parsedDeckCreatedOn() {
+      return this.deckCreatedOn
+        ? new Date(this.deckCreatedOn).toLocaleDateString()
+        : "-";
+    },
   },
 
   data() {
@@ -103,9 +114,14 @@ export default {
     this.deckTitle = this.$route.query.t;
     this.deckId = this.$route.params.deckId;
     document.title = `${this.deckTitle} - Flashlearn`;
+
+    console.log(this.deckId);
+    this.loadDeck(this.deckId);
   },
 
   methods: {
+    ...Vuex.mapActions(["loadDeck"]),
+
     tabChange(tabName) {
       let routeName = "";
       if (tabName === "cards") {

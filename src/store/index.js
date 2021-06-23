@@ -4,13 +4,17 @@ import Vuex from "vuex";
 import { loginAPI, validateTokenAPI } from "@/endpoints/auth";
 import {
   getDecksAPI,
+  retrieveDeckAPI,
   getDeckCardsAPI,
+  getDeckSessionsAPI,
   createDeckAPI,
   createCardInDeckAPI,
   startRevisionAPI,
   retrieveSessionAPI,
   getNextCardAPI,
   moveCardAPI,
+  markSessionAsCompleteAPI,
+  deleteDeckAPI,
 } from "@/endpoints/deck";
 
 Vue.use(Vuex);
@@ -23,8 +27,14 @@ const getDefaultState = () => {
     },
     isDecksLoaded: false,
     decks: [],
+
+    deck: null,
+
     isDeckCardsLoaded: false,
     deckCards: [],
+
+    isDeckSessionsLoaded: false,
+    deckSessions: [],
 
     isCardSidebarOpen: false,
     selectedCard: {
@@ -42,6 +52,7 @@ const getDefaultState = () => {
       id: null,
       title: null,
       date: null,
+      deck_id: null,
     },
 
     sessionNextCard: null,
@@ -59,8 +70,18 @@ export default new Vuex.Store({
     getIsDecksLoaded: (state) => state.isDecksLoaded,
     getDecks: (state) => state.decks,
 
+    getDeck: (state) => state.deck,
+    getDeckCardsCount: (state) => (state.deck ? state.deck.cards : "-"),
+    getDeckCreatedOn: (state) =>
+      state.deck ? state.deck.__createdtime__ : null,
+    getDeckIsTodaysSessionCompleted: (state) =>
+      state.deck ? state.deck.is_todays_session_completed : true,
+
     getIsDeckCardsLoaded: (state) => state.isDeckCardsLoaded,
     getDeckCards: (state) => state.deckCards,
+
+    getIsDeckSessionsLoaded: (state) => state.isDeckSessionsLoaded,
+    getDeckSessions: (state) => state.deckSessions,
 
     getIsCardSidebarOpen: (state) => state.isCardSidebarOpen,
     getSelectedCardTitle: (state) => state.selectedCard.title,
@@ -73,17 +94,32 @@ export default new Vuex.Store({
     getSessionId: (state) => state.session.id,
     getSessionTitle: (state) => state.session.title,
     getSessionDate: (state) => state.session.date,
+    getSessionDeckId: (state) => state.session.deck_id,
 
     getIsSessionLoadingNewCard: (state) => state.isSessionLoadingNewCard,
 
     getSessionCardId: (state) =>
       state.sessionNextCard ? state.sessionNextCard.card.card_id : "",
-    getSessionCardTitle: (state) =>
-      state.sessionNextCard ? state.sessionNextCard.card.title : "",
-    getSessionCardContents: (state) =>
-      state.sessionNextCard ? state.sessionNextCard.card.content : "",
+    getSessionCardTitle: (state) => {
+      try {
+        return state.sessionNextCard.card.title;
+      } catch (error) {
+        return "";
+      }
+    },
+    getSessionCardContents: (state) => {
+      try {
+        return state.sessionNextCard.card.content;
+      } catch (error) {
+        return "";
+      }
+    },
     getSessionRemainingCards: (state) =>
       state.sessionNextCard ? state.sessionNextCard.remaining_cards : 0,
+    getIsSessionCompleted: (state) =>
+      state.sessionNextCard
+        ? state.sessionNextCard.is_session_completed
+        : false,
   },
 
   mutations: {
@@ -105,6 +141,26 @@ export default new Vuex.Store({
       decks.unshift(payload);
       Vue.set(state, "decks", decks);
     },
+    DELETE_DECK: (state, deckId) => {
+      const decks = [...state.decks];
+      const index = decks.findIndex((item) => item.id === deckId);
+      if (index !== -1) {
+        decks.splice(index, 1);
+      }
+      Vue.set(state, "decks", decks);
+    },
+
+    SET_DECK: (state, payload) => (state.deck = payload),
+    INCREMENT_DECK_CARDS_COUNT: (state) => {
+      if (state.deck) {
+        state.deck.cards += 1;
+      }
+    },
+    DECREMENT_DECK_CARDS_COUNT: (state) => {
+      if (state.deck) {
+        state.deck.cards -= 1;
+      }
+    },
 
     SET_IS_DECK_CARDS_LOADED: (state, payload) =>
       (state.isDeckCardsLoaded = payload),
@@ -114,6 +170,10 @@ export default new Vuex.Store({
       cards.push(payload);
       Vue.set(state, "deckCards", cards);
     },
+
+    SET_IS_DECK_SESSIONS_LOADED: (state, payload) =>
+      (state.isDeckSessionsLoaded = payload),
+    SET_DECK_SESSIONS: (state, payload) => (state.deckSessions = payload),
 
     SET_IS_CARD_SIDEBAR_OPEN: (state, payload) =>
       (state.isCardSidebarOpen = payload),
@@ -131,6 +191,7 @@ export default new Vuex.Store({
     SET_SESSION_ID: (state, payload) => (state.session.id = payload),
     SET_SESSION_TITLE: (state, payload) => (state.session.title = payload),
     SET_SESSION_DATE: (state, payload) => (state.session.date = payload),
+    SET_SESSION_DECK_ID: (state, payload) => (state.session.deck_id = payload),
 
     SET_IS_SESSION_LOADING_NEW_CARD: (state, payload) =>
       (state.isSessionLoadingNewCard = payload),
@@ -143,7 +204,7 @@ export default new Vuex.Store({
     async authLogin({ commit }, payload) {
       let creationToast = this._vm.$buefy.toast.open({
         indefinite: true,
-        message: `Logging in ...`,
+        message: `Logging in ... Please wait ...`,
         type: "is-success",
       });
       const response = await loginAPI(payload);
@@ -199,6 +260,56 @@ export default new Vuex.Store({
       if (response.status === 200) {
         commit("SET_IS_DECK_CARDS_LOADED", true);
         commit("SET_DECK_CARDS", response.data);
+      }
+    },
+
+    async loadDeck({ commit }, deckId) {
+      commit("SET_DECK", null);
+      const response = await retrieveDeckAPI(deckId);
+      if (response.status === 200) {
+        commit("SET_DECK", response.data);
+      }
+    },
+
+    async deleteDeck({ commit }, deckId) {
+      let toast = this._vm.$buefy.toast.open({
+        indefinite: true,
+        message: `Deleting deck ... Please wait ...`,
+        type: "is-success",
+      });
+      const response = await deleteDeckAPI(deckId);
+      if (response.status === 200) {
+        commit("DELETE_DECK", deckId);
+        if (toast) {
+          toast.close();
+          toast = null;
+        }
+      }
+    },
+
+    async loadDeckSessions({ commit }, deckId) {
+      commit("SET_IS_DECK_SESSIONS_LOADED", false);
+      commit("SET_DECK_SESSIONS", []);
+      const response = await getDeckSessionsAPI(deckId);
+      if (response.status === 200) {
+        const data = response.data;
+        for (let i = 0; i < data.length; i++) {
+          const item = data[i];
+          item["sr_no"] = i + 1;
+          item["status"] = item.is_completed ? "COMPLETED" : "PENDING";
+
+          let percent = 0;
+          if (item.total_cards !== 0) {
+            percent = Math.floor(
+              (item.correct_cards_count / item.total_cards) * 100
+            );
+          }
+
+          item["success_rate"] = `${percent}%`;
+        }
+
+        commit("SET_IS_DECK_SESSIONS_LOADED", true);
+        commit("SET_DECK_SESSIONS", data);
       }
     },
 
@@ -267,6 +378,7 @@ export default new Vuex.Store({
         }
         dispatch("closeCardFormForAdd");
         commit("ADD_CARD_TO_DECK", response.data);
+        commit("INCREMENT_DECK_CARDS_COUNT");
         commit("SET_FORM_CARD_TITLE", "");
         commit("SET_FORM_CARD_CONTENT", "");
       }
@@ -284,6 +396,7 @@ export default new Vuex.Store({
         commit("SET_SESSION_ID", data.id);
         commit("SET_SESSION_TITLE", data.title);
         commit("SET_SESSION_DATE", data.session_date);
+        commit("SET_SESSION_DECK_ID", data.deck_id);
         if (creationToast) {
           creationToast.close();
           creationToast = null;
@@ -304,6 +417,7 @@ export default new Vuex.Store({
         commit("SET_SESSION_ID", data.id);
         commit("SET_SESSION_TITLE", data.title);
         commit("SET_SESSION_DATE", data.session_date);
+        commit("SET_SESSION_DECK_ID", data.deck_id);
         if (creationToast) {
           creationToast.close();
           creationToast = null;
@@ -325,12 +439,28 @@ export default new Vuex.Store({
     async moveCard({ getters }, isCorrect) {
       const sessionId = getters["getSessionId"];
       const cardId = getters["getSessionCardId"];
-      // commit("SET_IS_SESSION_LOADING_NEW_CARD", true);
       const response = await moveCardAPI(sessionId, {
         card_id: cardId,
         is_correct: isCorrect,
       });
       if (response.status === 200) {
+        return { success: true };
+      }
+    },
+
+    // eslint-disable-next-line no-empty-pattern
+    async markSessionAsComplete({}, sessionId) {
+      let creationToast = this._vm.$buefy.toast.open({
+        indefinite: true,
+        message: `Closing session ... Please wait ...`,
+        type: "is-success",
+      });
+      const response = await markSessionAsCompleteAPI(sessionId);
+      if (response.status === 200) {
+        if (creationToast) {
+          creationToast.close();
+          creationToast = null;
+        }
         return { success: true };
       }
     },

@@ -1,7 +1,7 @@
 <template>
   <section>
     <div
-      v-if="!isLoadingNewCard"
+      v-if="!isLoadingNewCard && !isSessionCompleted"
       class="flip-card"
       :class="{
         'cursor-pointer': !isRevealCard,
@@ -28,6 +28,13 @@
       </div>
     </div>
 
+    <div
+      v-if="!isLoadingNewCard && isSessionCompleted"
+      class="flip-card front-card-design"
+    >
+      Session completed!
+    </div>
+
     <transition
       enter-active-class="animate__animated animate__flipInX animate__slow"
     >
@@ -43,6 +50,10 @@
 <script>
 export default {
   props: {
+    isSessionCompleted: {
+      type: Boolean,
+      required: true,
+    },
     isLoadingNewCard: {
       type: Boolean,
       required: true,
