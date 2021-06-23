@@ -15,6 +15,8 @@ import {
   moveCardAPI,
   markSessionAsCompleteAPI,
   deleteDeckAPI,
+  deleteCardAPI,
+  updateDeckAPI,
 } from "@/endpoints/deck";
 
 Vue.use(Vuex);
@@ -42,6 +44,7 @@ const getDefaultState = () => {
       content: "",
     },
 
+    isCardUpdateCase: false,
     isCardFormSidebarOpen: false,
     formCard: {
       title: "",
@@ -71,6 +74,7 @@ export default new Vuex.Store({
     getDecks: (state) => state.decks,
 
     getDeck: (state) => state.deck,
+    getDeckTitle: (state) => (state.deck ? state.deck.title : null),
     getDeckCardsCount: (state) => (state.deck ? state.deck.cards : "-"),
     getDeckCreatedOn: (state) =>
       state.deck ? state.deck.__createdtime__ : null,
@@ -87,6 +91,7 @@ export default new Vuex.Store({
     getSelectedCardTitle: (state) => state.selectedCard.title,
     getSelectedCardContent: (state) => state.selectedCard.content,
 
+    getIsCardUpdateCase: (state) => state.isCardUpdateCase,
     getIsCardFormSidebarOpen: (state) => state.isCardFormSidebarOpen,
     getFormCardTitle: (state) => state.formCard.title,
     getFormCardContent: (state) => state.formCard.content,
@@ -149,6 +154,19 @@ export default new Vuex.Store({
       }
       Vue.set(state, "decks", decks);
     },
+    UPDATE_DECK_TITLE: (state, payload) => {
+      const { deckId, title } = payload;
+      const decks = [...state.decks];
+      const index = decks.findIndex((item) => item.id === deckId);
+      if (index !== -1) {
+        decks[index].title = title;
+        Vue.set(state, "decks", decks);
+      }
+
+      if (state.deck) {
+        state.deck.title = title;
+      }
+    },
 
     SET_DECK: (state, payload) => (state.deck = payload),
     INCREMENT_DECK_CARDS_COUNT: (state) => {
@@ -170,6 +188,14 @@ export default new Vuex.Store({
       cards.push(payload);
       Vue.set(state, "deckCards", cards);
     },
+    DELETE_CARD: (state, deckId) => {
+      const cards = [...state.deckCards];
+      const index = cards.findIndex((item) => item.id === deckId);
+      if (index !== -1) {
+        cards.splice(index, 1);
+      }
+      Vue.set(state, "deckCards", cards);
+    },
 
     SET_IS_DECK_SESSIONS_LOADED: (state, payload) =>
       (state.isDeckSessionsLoaded = payload),
@@ -182,6 +208,8 @@ export default new Vuex.Store({
     SET_SELECTED_CARD_CONTENT: (state, payload) =>
       (state.selectedCard.content = payload),
 
+    SET_IS_CARD_UPDATE_CASE: (state, payload) =>
+      (state.isCardUpdateCase = payload),
     SET_IS_CARD_FORM_SIDEBAR_OPEN: (state, payload) =>
       (state.isCardFormSidebarOpen = payload),
     SET_FORM_CARD_TITLE: (state, payload) => (state.formCard.title = payload),
@@ -287,6 +315,24 @@ export default new Vuex.Store({
       }
     },
 
+    async deleteCard({ commit }, cardId) {
+      console.log("deleting ...");
+      let toast = this._vm.$buefy.toast.open({
+        indefinite: true,
+        message: `Deleting card ... Please wait ...`,
+        type: "is-success",
+      });
+      const response = await deleteCardAPI(cardId);
+      if (response.status === 200) {
+        commit("DELETE_CARD", cardId);
+        commit("DECREMENT_DECK_CARDS_COUNT");
+        if (toast) {
+          toast.close();
+          toast = null;
+        }
+      }
+    },
+
     async loadDeckSessions({ commit }, deckId) {
       commit("SET_IS_DECK_SESSIONS_LOADED", false);
       commit("SET_DECK_SESSIONS", []);
@@ -324,6 +370,23 @@ export default new Vuex.Store({
       if (response.status === 200) {
         const newCard = response.data;
         commit("ADD_DECK_CARD", newCard);
+        if (creationToast) {
+          creationToast.close();
+          creationToast = null;
+        }
+      }
+    },
+
+    async updateDeck({ commit }, payload) {
+      const { title, deckId } = payload;
+      let creationToast = this._vm.$buefy.toast.open({
+        indefinite: true,
+        message: `Updating deck ... Please wait ...`,
+        type: "is-success",
+      });
+      const response = await updateDeckAPI(deckId, { title });
+      if (response.status === 200) {
+        commit("UPDATE_DECK_TITLE", { deckId, title });
         if (creationToast) {
           creationToast.close();
           creationToast = null;
@@ -462,6 +525,20 @@ export default new Vuex.Store({
           creationToast = null;
         }
         return { success: true };
+      }
+    },
+
+    openEditCardForm({ commit, getters }, cardId) {
+      console.log("herer!");
+      const cards = getters["getDeckCards"];
+      const index = cards.findIndex((item) => item.id === cardId);
+      if (index !== -1) {
+        const { title, content } = cards[index];
+        console.log("*", title, content);
+        commit("SET_IS_CARD_UPDATE_CASE", true);
+        commit("SET_FORM_CARD_TITLE", title);
+        commit("SET_FORM_CARD_CONTENT", content);
+        commit("SET_IS_CARD_FORM_SIDEBAR_OPEN", true);
       }
     },
   },

@@ -7,6 +7,16 @@
       @on-clicked="startRevision()"
     />
 
+    <b-modal v-model="isImageModalActive">
+      <p class="image">
+        <img src="../assets/flashcardsapphowitworks.png" />
+      </p>
+    </b-modal>
+
+    <a class="ml-4 underline" @click="isImageModalActive = true">
+      How revision works
+    </a>
+
     <section class="pt-6">
       <div class="text-2xl font-bold mb-4">
         Previous Sessions
@@ -39,6 +49,7 @@ export default {
   },
   data() {
     return {
+      isImageModalActive: false,
       deckId: null,
       columns: [
         {
@@ -87,7 +98,7 @@ export default {
       sessionId: "getSessionId",
       isDeckSessionsLoaded: "getIsDeckSessionsLoaded",
       deckSessions: "getDeckSessions",
-      deckIsTodaysSessionCompleted: "getDeckIsTodaysSessionCompleted"
+      deckIsTodaysSessionCompleted: "getDeckIsTodaysSessionCompleted",
     }),
   },
 

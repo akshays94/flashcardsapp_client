@@ -30,9 +30,15 @@
       Go Back
     </router-link>
 
-    <BasePageTitle :title="deckTitle" />
+    <div class="flex items-center">
+      <BasePageTitle :title="deckTitle" />
+      <a class="ml-3 underline" @click="editTitle()">Edit title</a>
+    </div>
 
-    <div class="mt-4 mb-6 text-gray-500">
+    <div
+      class="mt-4 mb-6 text-gray-500"
+      :class="{ invisible: parsedDeckCreatedOn === '-' }"
+    >
       <div>
         Created on: {{ parsedDeckCreatedOn }} | Cards in this deck:
         {{ deckCardsCount }}
@@ -85,6 +91,7 @@ export default {
       isCardFormSidebarOpen: "getIsCardFormSidebarOpen",
       deckCardsCount: "getDeckCardsCount",
       deckCreatedOn: "getDeckCreatedOn",
+      storeTitle: "getDeckTitle",
     }),
 
     parsedDeckCreatedOn() {
@@ -120,7 +127,7 @@ export default {
   },
 
   methods: {
-    ...Vuex.mapActions(["loadDeck"]),
+    ...Vuex.mapActions(["loadDeck", "updateDeck"]),
 
     tabChange(tabName) {
       let routeName = "";
@@ -140,6 +147,29 @@ export default {
         params: { deckId },
         query: { t: deckTitle },
       });
+    },
+
+    editTitle() {
+      this.$buefy.dialog.prompt({
+        title: "Edit title",
+        message: `Title of the deck`,
+        inputAttrs: {
+          maxlength: 20,
+          value: this.deckTitle,
+        },
+        trapFocus: true,
+        onConfirm: async (title) => {
+          await this.updateDeck({ deckId: this.deckId, title });
+        },
+      });
+    },
+  },
+
+  watch: {
+    storeTitle(val) {
+      if (val) {
+        this.deckTitle = val;
+      }
     },
   },
 };

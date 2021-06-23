@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div
-      class="flex flex-col items-start md:flex-row md:justify-between md:items-end mb-12"
+    <section
+      class="flex flex-col items-start md:flex-row md:justify-between md:items-end mb-16"
     >
       <BasePageTitle title="Decks" />
 
@@ -11,7 +11,7 @@
         button-color="green"
         @on-clicked="addNewDeck()"
       />
-    </div>
+    </section>
 
     <section v-if="isDecksLoaded">
       <transition-group
@@ -36,10 +36,19 @@
         </div>
       </transition-group>
 
-      <div v-else>No decks added</div>
+      <div v-else>
+        <BaseEmpty
+          class="animate__animated animate__fadeIn"
+          message="No decks added"
+        >
+          <img class="w-1/2" src="../assets/undraw_empty.svg" />
+        </BaseEmpty>
+      </div>
     </section>
 
-    <div v-else>Loading decks ...</div>
+    <div v-else>
+      <BaseLoading message="Loading decks ..." />
+    </div>
   </div>
 </template>
 
@@ -48,6 +57,8 @@ import Vuex from "vuex";
 import CardDeck from "@/components/CardDeck.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BasePageTitle from "@/components/BasePageTitle.vue";
+import BaseLoading from "@/components/BaseLoading.vue";
+import BaseEmpty from "@/components/BaseEmpty.vue";
 
 export default {
   title: "Decks",
@@ -56,6 +67,8 @@ export default {
     CardDeck,
     BaseButton,
     BasePageTitle,
+    BaseLoading,
+    BaseEmpty,
   },
   computed: {
     ...Vuex.mapGetters({
@@ -93,7 +106,6 @@ export default {
     },
 
     deleteCard(deckId, deckTitle) {
-      console.log(deckId, "deletee");
       this.$buefy.dialog.confirm({
         message: `Delete ${deckTitle}?`,
         confirmText: "Delete Deck",

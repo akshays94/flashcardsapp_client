@@ -1,13 +1,13 @@
 <template>
   <section>
     <section v-if="sessionId !== null">
-      <!-- <router-link
+      <button
         tag="button"
-        :to="{ name: 'PageHome' }"
         class="mb-4 text-gray-400 underline outline-none select-none"
+        @click="onDoneForTheDayClick()"
       >
         Go Back
-      </router-link> -->
+      </button>
 
       <BasePageTitle :title="sessionTitle" />
 

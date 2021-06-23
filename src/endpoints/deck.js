@@ -16,6 +16,9 @@ export const getDeckSessionsAPI = (deckId) =>
 
 export const createDeckAPI = (data) => withAuthAxios.post(`/decks/`, data);
 
+export const updateDeckAPI = (deckId, data) =>
+  withAuthAxios.put(`/decks/${deckId}/`, data);
+
 export const createCardInDeckAPI = (deckId, data) =>
   withAuthAxios.post(`/decks/${deckId}/cards/`, data);
 
@@ -33,3 +36,6 @@ export const moveCardAPI = (sessionId, data) =>
 
 export const markSessionAsCompleteAPI = (sessionId) =>
   withAuthAxios.post(`/sessions/${sessionId}/mark-complete/`);
+
+export const deleteCardAPI = (cardId) =>
+  withAuthAxios.delete(`/cards/${cardId}/`);

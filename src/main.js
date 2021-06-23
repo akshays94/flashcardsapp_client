@@ -1,6 +1,6 @@
 import Vue from "vue";
 import App from "./App.vue";
-import { Dialog, Toast, Sidebar, Input, Field, Table, Tag } from "buefy";
+import { Dialog, Toast, Sidebar, Input, Field, Table, Tag, Modal } from "buefy";
 import "./index.css";
 import "animate.css";
 import "buefy/dist/buefy.css";
@@ -17,6 +17,7 @@ Vue.use(Field);
 Vue.use(Input);
 Vue.use(Table);
 Vue.use(Tag);
+Vue.use(Modal);
 
 Vue.mixin(titleMixin);
 
