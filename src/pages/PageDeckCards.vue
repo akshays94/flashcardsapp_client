@@ -96,7 +96,6 @@ export default {
     },
 
     openEditCardForm(cardId) {
-      console.log("editing cardId", cardId);
       this.openEditCardForm(cardId);
     },
   },

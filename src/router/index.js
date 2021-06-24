@@ -61,7 +61,6 @@ router.beforeEach(async (to, from, next) => {
   const isNoTokenInStorage = !localStorageToken;
 
   if (isProtectedRoute) {
-    // console.log("here", to.name, from, next);
     if (store.getters.hasToken) {
       next();
     } else {
@@ -69,22 +68,19 @@ router.beforeEach(async (to, from, next) => {
         next({ name: "PageLogin" });
       } else {
         const result = await store.dispatch("authSetUserFromToken");
-        // console.log("result .. ***.", result.success);
         if (result.success) {
-          console.log("yes");
           next();
         } else {
-          console.log("no");
           next({ name: "PageLogin" });
         }
       }
     }
   } else {
-    // if (isNoTokenInStorage) {
-    //   next();
-    // } else {
-    //   next({ name: "PageHome" });
-    // }
+    if (isNoTokenInStorage) {
+      next();
+    } else {
+      next({ name: "PageHome" });
+    }
     next();
   }
 });

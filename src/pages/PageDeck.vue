@@ -122,7 +122,6 @@ export default {
     this.deckId = this.$route.params.deckId;
     document.title = `${this.deckTitle} - Flashlearn`;
 
-    console.log(this.deckId);
     this.loadDeck(this.deckId);
   },
 

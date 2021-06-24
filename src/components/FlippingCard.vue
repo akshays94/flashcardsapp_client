@@ -1,5 +1,15 @@
 <template>
   <section>
+    <audio src="../assets/flip.mp3" ref="flipAudio"></audio>
+    <audio src="../assets/correctanswer.mp3" ref="correctAnswerAudio"></audio>
+    <audio src="../assets/wronganswer.mp3" ref="wrongAnswerAudio"></audio>
+    <audio
+      src="../assets/success.mp3"
+      ref="successAudio"
+      muted
+      :autoplay="false"
+    ></audio>
+
     <div
       v-if="!isLoadingNewCard && !isSessionCompleted"
       class="flip-card"
@@ -30,9 +40,14 @@
 
     <div
       v-if="!isLoadingNewCard && isSessionCompleted"
-      class="flip-card front-card-design"
+      class="flip-card front-card-design flex flex-col"
     >
-      Session completed!
+      <img
+        src="../assets/greentick.gif"
+        class="w-1/4 animate__animated animate__heartBeat"
+        alt=""
+      />
+      <div class="mt-2">Session completed!</div>
     </div>
 
     <transition
@@ -81,6 +96,33 @@ export default {
     isCorrectAnswer: {
       type: Boolean,
       required: true,
+    },
+  },
+
+  watch: {
+    isRevealCard(val) {
+      if (val === true) {
+        this.$refs.flipAudio.play();
+      }
+    },
+
+    isAnswered(val) {
+      if (val === true) {
+        if (this.isCorrectAnswer) {
+          this.$refs.correctAnswerAudio.play();
+        } else {
+          this.$refs.wrongAnswerAudio.play();
+        }
+      }
+    },
+
+    isSessionCompleted(val) {
+      if (val === true) {
+        if (!this.isLoadingNewCard) {
+          this.$refs.successAudio.muted = false;
+          this.$refs.successAudio.play();
+        }
+      }
     },
   },
 };

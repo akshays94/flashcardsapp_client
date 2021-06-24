@@ -2,7 +2,11 @@
   <section class="pt-6">
     <BaseButton
       :disabled="deckIsTodaysSessionCompleted"
-      title="Start today's revision session"
+      :title="
+        deckIsTodaysSessionCompleted
+          ? `Today's session completed`
+          : `Start today's revision session`
+      "
       button-color="yellow"
       @on-clicked="startRevision()"
     />
@@ -14,7 +18,7 @@
     </b-modal>
 
     <a class="ml-4 underline" @click="isImageModalActive = true">
-      How revision works
+      How revision works?
     </a>
 
     <section class="pt-6">

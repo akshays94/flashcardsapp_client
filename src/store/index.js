@@ -1,7 +1,7 @@
 import Vue from "vue";
 import Vuex from "vuex";
 
-import { loginAPI, validateTokenAPI } from "@/endpoints/auth";
+import { registerAPI, loginAPI, validateTokenAPI } from "@/endpoints/auth";
 import {
   getDecksAPI,
   retrieveDeckAPI,
@@ -229,26 +229,68 @@ export default new Vuex.Store({
   },
 
   actions: {
+    // eslint-disable-next-line no-empty-pattern
+    async authCreateNewAccount({}, payload) {
+      let creationToast = this._vm.$buefy.toast.open({
+        indefinite: true,
+        message: `Creating new account ... Please wait ...`,
+        type: "is-success",
+      });
+      try {
+        const response = await registerAPI(payload);
+        if (response.status === 200) {
+          return { success: true };
+        }
+        return { success: false };
+      } catch (error) {
+        const errResponse = error.response;
+        if (errResponse.status === 409) {
+          return {
+            success: false,
+            status: 409,
+            message: errResponse.data.detail,
+          };
+        }
+      } finally {
+        if (creationToast) {
+          creationToast.close();
+          creationToast = null;
+        }
+      }
+    },
+
     async authLogin({ commit }, payload) {
       let creationToast = this._vm.$buefy.toast.open({
         indefinite: true,
         message: `Logging in ... Please wait ...`,
         type: "is-success",
       });
-      const response = await loginAPI(payload);
-      if (response.status === 200) {
-        const { access_token, user } = response["data"];
-        commit("SET_AUTH_TOKEN", access_token);
-        commit("SET_AUTH_USER", user);
-        localStorage.setItem("token", access_token);
-        localStorage.setItem("user", JSON.stringify(user));
+      try {
+        const response = await loginAPI(payload);
+        if (response.status === 200) {
+          const { access_token, user } = response["data"];
+          commit("SET_AUTH_TOKEN", access_token);
+          commit("SET_AUTH_USER", user);
+          localStorage.setItem("token", access_token);
+          localStorage.setItem("user", JSON.stringify(user));
+          return { success: true };
+        }
+        return { success: false };
+      } catch (error) {
+        const errResponse = error.response;
+        if (errResponse.status === 401) {
+          return {
+            success: false,
+            status: errResponse.status,
+            message: errResponse.data.detail,
+          };
+        }
+      } finally {
         if (creationToast) {
           creationToast.close();
           creationToast = null;
         }
-        return { success: true };
       }
-      return { success: false };
     },
 
     authLogout({ commit }) {
@@ -316,7 +358,6 @@ export default new Vuex.Store({
     },
 
     async deleteCard({ commit }, cardId) {
-      console.log("deleting ...");
       let toast = this._vm.$buefy.toast.open({
         indefinite: true,
         message: `Deleting card ... Please wait ...`,
@@ -359,20 +400,30 @@ export default new Vuex.Store({
       }
     },
 
-    async createDeck({ commit }, payload) {
+    async createDeck({ getters, commit }, payload) {
       const { title } = payload;
-      let creationToast = this._vm.$buefy.toast.open({
-        indefinite: true,
-        message: `Creating deck ... Please wait ...`,
-        type: "is-success",
-      });
-      const response = await createDeckAPI({ title });
-      if (response.status === 200) {
-        const newCard = response.data;
-        commit("ADD_DECK_CARD", newCard);
-        if (creationToast) {
-          creationToast.close();
-          creationToast = null;
+
+      const decks = getters["getDecks"];
+      const i = decks.findIndex((item) => item.title === title);
+      if (i !== -1) {
+        this._vm.$buefy.toast.open({
+          message: `This deck already exists`,
+          type: "is-danger",
+        });
+      } else {
+        let creationToast = this._vm.$buefy.toast.open({
+          indefinite: true,
+          message: `Creating deck ... Please wait ...`,
+          type: "is-success",
+        });
+        const response = await createDeckAPI({ title });
+        if (response.status === 200) {
+          const newCard = response.data;
+          commit("ADD_DECK_CARD", newCard);
+          if (creationToast) {
+            creationToast.close();
+            creationToast = null;
+          }
         }
       }
     },
@@ -529,12 +580,10 @@ export default new Vuex.Store({
     },
 
     openEditCardForm({ commit, getters }, cardId) {
-      console.log("herer!");
       const cards = getters["getDeckCards"];
       const index = cards.findIndex((item) => item.id === cardId);
       if (index !== -1) {
         const { title, content } = cards[index];
-        console.log("*", title, content);
         commit("SET_IS_CARD_UPDATE_CASE", true);
         commit("SET_FORM_CARD_TITLE", title);
         commit("SET_FORM_CARD_CONTENT", content);

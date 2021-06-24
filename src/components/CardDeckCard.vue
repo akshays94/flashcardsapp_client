@@ -8,7 +8,7 @@
       @mouseleave="showActions = false"
     >
       {{ title }}
-      <transition
+      <!-- <transition
         enter-active-class="animate__animated animate__fadeIn animate__faster"
       >
         <div v-show="showActions" class="absolute" style="bottom: 38px;">
@@ -28,7 +28,7 @@
             Delete
           </button>
         </div>
-      </transition>
+      </transition> -->
     </div>
   </div>
 </template>
