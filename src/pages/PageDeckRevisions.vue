@@ -1,6 +1,11 @@
 <template>
   <section class="pt-6">
+    <span v-if="deckCardsCount === 0" class="text-gray-500">
+      You can start revision once cards are added to this deck.
+    </span>
+
     <BaseButton
+      v-else
       :disabled="deckIsTodaysSessionCompleted"
       :title="
         deckIsTodaysSessionCompleted
@@ -74,11 +79,11 @@ export default {
           label: "Correct cards",
           numeric: true,
         },
-        {
-          field: "incorrect_cards_count",
-          label: "Incorrect cards",
-          numeric: true,
-        },
+        // {
+        //   field: "incorrect_cards_count",
+        //   label: "Incorrect cards",
+        //   numeric: true,
+        // },
         {
           field: "success_rate",
           label: "Success",
@@ -103,6 +108,7 @@ export default {
       isDeckSessionsLoaded: "getIsDeckSessionsLoaded",
       deckSessions: "getDeckSessions",
       deckIsTodaysSessionCompleted: "getDeckIsTodaysSessionCompleted",
+      deckCardsCount: "getDeckCardsCount"
     }),
   },
 
