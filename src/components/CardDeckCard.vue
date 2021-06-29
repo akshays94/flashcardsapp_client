@@ -8,27 +8,28 @@
       @mouseleave="showActions = false"
     >
       {{ title }}
-      <!-- <transition
+      <transition
         enter-active-class="animate__animated animate__fadeIn animate__faster"
       >
         <div v-show="showActions" class="absolute" style="bottom: 38px;">
-          <button
+          <!-- <button
             class="absolute bg-purple-300 text-sm py-1 px-2 rounded-full mb-2 shadow-xl"
             style="left: -52px;"
             @click.self="$emit('edit-card')"
           >
             Edit
-          </button>
+          </button> -->
 
           <button
             class="absolute bg-red-300 text-sm py-1 px-2 rounded-full mb-2 shadow-xl"
             @click.prevent.stop="$emit('delete-card')"
             title="Delete this card"
+            style="left: -30px;"
           >
             Delete
           </button>
         </div>
-      </transition> -->
+      </transition>
     </div>
   </div>
 </template>

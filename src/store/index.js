@@ -234,11 +234,16 @@ export default new Vuex.Store({
       let creationToast = this._vm.$buefy.toast.open({
         indefinite: true,
         message: `Creating new account ... Please wait ...`,
-        type: "is-success",
+        type: "is-primary",
       });
       try {
         const response = await registerAPI(payload);
         if (response.status === 200) {
+          this._vm.$buefy.toast.open({
+            indefinite: false,
+            message: `User created... Please log in ...`,
+            type: "is-success",
+          });
           return { success: true };
         }
         return { success: false };
@@ -326,18 +331,27 @@ export default new Vuex.Store({
     async loadDeckCards({ commit }, deckId) {
       commit("SET_IS_DECK_CARDS_LOADED", false);
       commit("SET_DECK_CARDS", []);
-      const response = await getDeckCardsAPI(deckId);
-      if (response.status === 200) {
+      try {
+        const response = await getDeckCardsAPI(deckId);
+        if (response.status === 200) {
+          commit("SET_IS_DECK_CARDS_LOADED", true);
+          commit("SET_DECK_CARDS", response.data);
+        }
+      } catch (error) {
         commit("SET_IS_DECK_CARDS_LOADED", true);
-        commit("SET_DECK_CARDS", response.data);
+        commit("SET_DECK_CARDS", []);
       }
     },
 
     async loadDeck({ commit }, deckId) {
       commit("SET_DECK", null);
-      const response = await retrieveDeckAPI(deckId);
-      if (response.status === 200) {
-        commit("SET_DECK", response.data);
+      try {
+        const response = await retrieveDeckAPI(deckId);
+        if (response.status === 200) {
+          commit("SET_DECK", response.data);
+        }
+      } catch (error) {
+        commit("SET_DECK", null);
       }
     },
 
@@ -347,9 +361,16 @@ export default new Vuex.Store({
         message: `Deleting deck ... Please wait ...`,
         type: "is-success",
       });
-      const response = await deleteDeckAPI(deckId);
-      if (response.status === 200) {
-        commit("DELETE_DECK", deckId);
+      try {
+        const response = await deleteDeckAPI(deckId);
+        if (response.status === 200) {
+          commit("DELETE_DECK", deckId);
+          if (toast) {
+            toast.close();
+            toast = null;
+          }
+        }
+      } finally {
         if (toast) {
           toast.close();
           toast = null;
@@ -363,10 +384,17 @@ export default new Vuex.Store({
         message: `Deleting card ... Please wait ...`,
         type: "is-success",
       });
-      const response = await deleteCardAPI(cardId);
-      if (response.status === 200) {
-        commit("DELETE_CARD", cardId);
-        commit("DECREMENT_DECK_CARDS_COUNT");
+      try {
+        const response = await deleteCardAPI(cardId);
+        if (response.status === 200) {
+          commit("DELETE_CARD", cardId);
+          commit("DECREMENT_DECK_CARDS_COUNT");
+          if (toast) {
+            toast.close();
+            toast = null;
+          }
+        }
+      } finally {
         if (toast) {
           toast.close();
           toast = null;
@@ -416,10 +444,17 @@ export default new Vuex.Store({
           message: `Creating deck ... Please wait ...`,
           type: "is-success",
         });
-        const response = await createDeckAPI({ title });
-        if (response.status === 200) {
-          const newCard = response.data;
-          commit("ADD_DECK_CARD", newCard);
+        try {
+          const response = await createDeckAPI({ title });
+          if (response.status === 200) {
+            const newCard = response.data;
+            commit("ADD_DECK_CARD", newCard);
+            if (creationToast) {
+              creationToast.close();
+              creationToast = null;
+            }
+          }
+        } finally {
           if (creationToast) {
             creationToast.close();
             creationToast = null;
@@ -435,9 +470,16 @@ export default new Vuex.Store({
         message: `Updating deck ... Please wait ...`,
         type: "is-success",
       });
-      const response = await updateDeckAPI(deckId, { title });
-      if (response.status === 200) {
-        commit("UPDATE_DECK_TITLE", { deckId, title });
+      try {
+        const response = await updateDeckAPI(deckId, { title });
+        if (response.status === 200) {
+          commit("UPDATE_DECK_TITLE", { deckId, title });
+          if (creationToast) {
+            creationToast.close();
+            creationToast = null;
+          }
+        }
+      } finally {
         if (creationToast) {
           creationToast.close();
           creationToast = null;
@@ -481,20 +523,27 @@ export default new Vuex.Store({
         message: `Creating card ... Please wait ...`,
         type: "is-success",
       });
-      const response = await createCardInDeckAPI(deckId, {
-        title,
-        content,
-      });
-      if (response.status === 200) {
+      try {
+        const response = await createCardInDeckAPI(deckId, {
+          title,
+          content,
+        });
+        if (response.status === 200) {
+          if (creationToast) {
+            creationToast.close();
+            creationToast = null;
+          }
+          dispatch("closeCardFormForAdd");
+          commit("ADD_CARD_TO_DECK", response.data);
+          commit("INCREMENT_DECK_CARDS_COUNT");
+          commit("SET_FORM_CARD_TITLE", "");
+          commit("SET_FORM_CARD_CONTENT", "");
+        }
+      } finally {
         if (creationToast) {
           creationToast.close();
           creationToast = null;
         }
-        dispatch("closeCardFormForAdd");
-        commit("ADD_CARD_TO_DECK", response.data);
-        commit("INCREMENT_DECK_CARDS_COUNT");
-        commit("SET_FORM_CARD_TITLE", "");
-        commit("SET_FORM_CARD_CONTENT", "");
       }
     },
 
@@ -504,18 +553,25 @@ export default new Vuex.Store({
         message: `Fetching session information ... Please wait ...`,
         type: "is-success",
       });
-      const response = await retrieveSessionAPI(sessionId);
-      if (response.status === 200) {
-        const data = response.data;
-        commit("SET_SESSION_ID", data.id);
-        commit("SET_SESSION_TITLE", data.title);
-        commit("SET_SESSION_DATE", data.session_date);
-        commit("SET_SESSION_DECK_ID", data.deck_id);
+      try {
+        const response = await retrieveSessionAPI(sessionId);
+        if (response.status === 200) {
+          const data = response.data;
+          commit("SET_SESSION_ID", data.id);
+          commit("SET_SESSION_TITLE", data.title);
+          commit("SET_SESSION_DATE", data.session_date);
+          commit("SET_SESSION_DECK_ID", data.deck_id);
+          if (creationToast) {
+            creationToast.close();
+            creationToast = null;
+          }
+          return { success: true };
+        }
+      } finally {
         if (creationToast) {
           creationToast.close();
           creationToast = null;
         }
-        return { success: true };
       }
     },
 
@@ -525,18 +581,25 @@ export default new Vuex.Store({
         message: `Starting session ... Please wait ...`,
         type: "is-success",
       });
-      const response = await startRevisionAPI(deckId);
-      if (response.status === 200) {
-        const data = response.data;
-        commit("SET_SESSION_ID", data.id);
-        commit("SET_SESSION_TITLE", data.title);
-        commit("SET_SESSION_DATE", data.session_date);
-        commit("SET_SESSION_DECK_ID", data.deck_id);
+      try {
+        const response = await startRevisionAPI(deckId);
+        if (response.status === 200) {
+          const data = response.data;
+          commit("SET_SESSION_ID", data.id);
+          commit("SET_SESSION_TITLE", data.title);
+          commit("SET_SESSION_DATE", data.session_date);
+          commit("SET_SESSION_DECK_ID", data.deck_id);
+          if (creationToast) {
+            creationToast.close();
+            creationToast = null;
+          }
+          return { success: true };
+        }
+      } finally {
         if (creationToast) {
           creationToast.close();
           creationToast = null;
         }
-        return { success: true };
       }
     },
 
@@ -569,13 +632,20 @@ export default new Vuex.Store({
         message: `Closing session ... Please wait ...`,
         type: "is-success",
       });
-      const response = await markSessionAsCompleteAPI(sessionId);
-      if (response.status === 200) {
+      try {
+        const response = await markSessionAsCompleteAPI(sessionId);
+        if (response.status === 200) {
+          if (creationToast) {
+            creationToast.close();
+            creationToast = null;
+          }
+          return { success: true };
+        }
+      } finally {
         if (creationToast) {
           creationToast.close();
           creationToast = null;
         }
-        return { success: true };
       }
     },
 
