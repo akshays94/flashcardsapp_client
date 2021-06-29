@@ -3,7 +3,7 @@
     <div
       class="bg-white w-full mx-4 px-5 py-6 md:w-2/5 md:p-6 shadow-xl hover:shadow-2xl transition-all duration-300"
     >
-      <header class="text-3xl font-bold mb-5">FLASHLEARN</header>
+      <header class="text-3xl font-bold mb-5">🍇&nbsp;FLASHLEARN</header>
 
       <section v-show="isLoginContainerOpen" class="login-box">
         <b-field
@@ -37,7 +37,7 @@
           />
 
           <div
-            class="ml-4 mt-4 md:mt-0 underline hover:no-underline cursor-pointer"
+            class="ml-4 mt-4 md:mt-0 underline hover:no-underline cursor-pointer font-bold hover:text-purple-700 transition-all"
             @click="isLoginContainerOpen = false"
           >
             Create new account (no email required)
